@@ -2,8 +2,9 @@ import React, { use, useEffect, useRef, useState } from 'react';
 import { motion, MotionValue, useMotionValueEvent, useScroll, useSpring, useTransform } from 'motion/react';
 import { MdOutlineArrowUpward, MdOutlineLaunch, MdOutlinePauseCircle, MdOutlinePlayCircle } from 'react-icons/md';
 import { FaEnvelope, FaGithub, FaLinkedin } from 'react-icons/fa';
-import { useInViewport, useMediaQuery } from '@mantine/hooks';
+import { useDebouncedCallback, useDocumentVisibility, useInViewport, useMediaQuery, useNetwork, usePageLeave, useTextSelection, useThrottledCallback, useViewportSize } from '@mantine/hooks';
 import { FaceSVG } from '../components/Face';
+import { track } from '@/utils/track';
 
 const TEXT_COLOR = '#0c2427';
 const BKG_COLOR = '#ccf0f5';
@@ -11,6 +12,8 @@ const PRIMARY_COLOR = '#2f6369';
 const PRIMARY_COLOR_TEXT = '#b4d8ddff';
 const SECONDARY_COLOR = '#95a5a7ff';
 const ACCENT_COLOR = '#f6943f';
+
+const INIT_ANIM_DUR = 2;
 
 type ItemType = {
     title: string;
@@ -113,10 +116,70 @@ const LandingPage = () => {
     const { scrollY, scrollYProgress } = useScroll({ container: pseudoBodyRef });
     const isLargeViewport = useMediaQuery('(min-width: 1200px)');
     const isMediumViewport = useMediaQuery('(min-width: 768px)');
+    const viewPortSize = useViewportSize();
     const topTagVisibility = useTransform(scrollY, [80, 150], ['100vw', '0vw'], { clamp: true });
     const topTagColor = useTransform(scrollY, [500, 1200], [BKG_COLOR, TEXT_COLOR], { clamp: true });
     const topTagVisibleSmooth = useSpring(topTagVisibility);
     const bottomTagOpacitySmooth = useSpring(useTransform(scrollY, [80, 150], [0, 1], { clamp: true }));
+    const networkStatus = useNetwork();
+    const selection = useTextSelection();
+    const documentState = useDocumentVisibility();
+
+    useEffect(() => {
+        track(`Entered LandingPage`);
+        return () => {
+            track('Unmounted LandingPage');
+        };
+    }, []);
+
+    const trackVp = useThrottledCallback(() => {
+        track(`Viewport Size: ${viewPortSize.width}x${viewPortSize.height}`);
+    }, 10000);
+
+    useEffect(() => {
+        if (viewPortSize.width === 0 || viewPortSize.height === 0) return;
+        trackVp();
+    }, [viewPortSize.width, viewPortSize.height]);
+
+    const trackScroll = useThrottledCallback(() => {
+        if (pseudoBodyRef.current) {
+            track(`Scroll Position: ${(pseudoBodyRef.current.scrollTop / pseudoBodyRef.current.scrollHeight) * 100}%`);
+        }
+    }, 2500);
+
+    useEffect(() => {
+        if (pseudoBodyRef.current) {
+            pseudoBodyRef.current.addEventListener('scroll', trackScroll);
+        }
+        return () => {
+            if (pseudoBodyRef.current) {
+                pseudoBodyRef.current.removeEventListener('scroll', trackScroll);
+            }
+        };
+    }, [trackScroll]);
+
+    const trackNetwork = useThrottledCallback(() => {
+        track(`Network Status: ${JSON.stringify(networkStatus)}`);
+    }, 10000);
+
+    useEffect(() => {
+        trackNetwork();
+    }, [JSON.stringify(networkStatus)]);
+
+    const trackTextSelection = useDebouncedCallback(() => {
+        if (selection && selection.toString().length > 0) {
+            track(`Text Selection: ${selection?.toString()}`);
+        }
+    }, 1000);
+
+    useEffect(() => {
+        trackTextSelection();
+    }, [selection?.toString()]);
+
+    useEffect(() => {
+        track(`Document Visibility: ${documentState}`);
+    }, [documentState]);
+
     return (
         <div
             ref={pseudoBodyRef}
@@ -132,7 +195,62 @@ const LandingPage = () => {
                 scrollSnapType: isLargeViewport ? 'y mandatory' : 'y proximity',
                 scrollBehavior: 'smooth',
             }}
+            onClick={(e) => {
+                const id = (e.target as any).id;
+                if (id) {
+                    track(`Clicked on: ${id}`);
+                }
+            }}
+            onAuxClick={(e) => {
+                const id = (e.target as any).id;
+                if (id) {
+                    track(`Aux Clicked on: ${id}`);
+                }
+            }}
         >
+            <motion.div
+                id="Initial Animation"
+                initial={{ opacity: 1 }}
+                animate={{ opacity: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: INIT_ANIM_DUR }}
+                style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    zIndex: 10000,
+                    height: '100vh',
+                    width: '100vw',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: PRIMARY_COLOR,
+                    pointerEvents: 'none',
+                }}
+            >
+                <motion.div
+                    initial={{ width: '0px', height: '0px' }}
+                    animate={{ width: '100vw', height: '100vh' }}
+                    transition={{ duration: INIT_ANIM_DUR, ease: 'easeInOut' }}
+                    style={{
+                        backgroundColor: BKG_COLOR,
+                        borderRadius: '10000px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}
+                >
+                    <motion.h1
+                        style={{ color: TEXT_COLOR }}
+                        initial={{ transform: 'translateY(2rem)' }}
+                        animate={{ transform: 'translateY(-2rem)' }}
+                        transition={{ duration: INIT_ANIM_DUR }}
+                    >
+                        Loading
+                    </motion.h1>
+                </motion.div>
+            </motion.div>
             <div
                 style={{
                     position: 'fixed',
@@ -175,6 +293,7 @@ const LandingPage = () => {
                             borderBottom: `2px solid ${PRIMARY_COLOR_TEXT}`,
                         }}
                         onClick={() => {
+                            track('Clicked GitHub Link');
                             window.open('https://github.com/Camo651', '_blank');
                         }}
                     >
@@ -198,6 +317,7 @@ const LandingPage = () => {
                             borderBottom: `2px solid ${PRIMARY_COLOR_TEXT}`,
                         }}
                         onClick={() => {
+                            track('Clicked LinkedIn Link');
                             window.open('https://www.linkedin.com/in/matt-hagger/', '_blank');
                         }}
                     >
@@ -221,6 +341,7 @@ const LandingPage = () => {
                             borderBottom: `2px solid ${PRIMARY_COLOR_TEXT}`,
                         }}
                         onClick={() => {
+                            track('Clicked Email Link');
                             window.open('mailto:matthagger64@gmail.com', '_blank');
                         }}
                     >
@@ -232,6 +353,7 @@ const LandingPage = () => {
                 </motion.div>
             </div>
             <motion.div
+                id="Top Tag"
                 style={{
                     position: 'fixed',
                     top: '2rem',
@@ -274,7 +396,7 @@ const LandingPage = () => {
             <motion.div
                 initial={{ transform: 'translateY(-50vh)', opacity: 0 }}
                 animate={{ transform: 'translateY(0)', opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
+                transition={{ duration: 0.5, delay: 0.2 + INIT_ANIM_DUR }}
                 style={{
                     scrollSnapAlign: 'start',
                     scrollSnapStop: 'normal',
@@ -292,12 +414,13 @@ const LandingPage = () => {
                         key={index}
                         initial={{ transform: 'translateY(-100%)' }}
                         animate={{ transform: 'translateY(-10.5vw)' }}
-                        transition={{ duration: 0.5, delay: index * 0.05 + 1.25, type: 'spring' }}
+                        transition={{ duration: 0.5, delay: index * 0.05 + 1.25 + INIT_ANIM_DUR, type: 'spring' }}
                     >
                         <motion.h1
+                            id={`MATT_${index}`}
                             initial={{ fontWeight: 100 }}
                             animate={{ fontWeight: 800 }}
-                            transition={{ duration: 0.5, delay: index * 0.02 + 1.4 }}
+                            transition={{ duration: 0.5, delay: index * 0.02 + 1.4 + INIT_ANIM_DUR }}
                             style={{
                                 minWidth: '6vw',
                                 fontSize: '34vw',
@@ -314,7 +437,7 @@ const LandingPage = () => {
             <motion.div
                 initial={{ transform: 'translateY(-50vh)', opacity: 0 }}
                 animate={{ transform: 'translateY(0)', opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.75 }}
+                transition={{ duration: 0.5, delay: 0.75 + INIT_ANIM_DUR }}
                 style={{
                     display: 'flex',
                     flexDirection: 'row',
@@ -330,12 +453,13 @@ const LandingPage = () => {
                         key={index}
                         initial={{ transform: 'translateY(-100%)' }}
                         animate={{ transform: 'translateY(-25.1vw)' }}
-                        transition={{ duration: 0.5, delay: index * 0.05 + 1.05, type: 'spring' }}
+                        transition={{ duration: 0.5, delay: index * 0.05 + 1.45 + INIT_ANIM_DUR, type: 'spring' }}
                     >
                         <motion.h1
+                            id={`HAGGER_${index}`}
                             initial={{ fontWeight: 800 }}
                             animate={{ fontWeight: 200 }}
-                            transition={{ duration: 0.5, delay: index * 0.02 + 1.15 }}
+                            transition={{ duration: 0.5, delay: index * 0.02 + 1.65 + INIT_ANIM_DUR }}
                             style={{
                                 minWidth: '6vw',
                                 fontSize: '22vw',
@@ -359,19 +483,21 @@ const LandingPage = () => {
                 }}
             >
                 <motion.div
-                    initial={{ transform: 'translateY(-170vh)' }}
+                    initial={{ transform: 'translateY(-200vh)' }}
                     animate={{ transform: 'translateY(0)' }}
-                    transition={{ duration: 0.25, delay: 0.5 }}
+                    transition={{ duration: 0.5, delay: 0.5 + INIT_ANIM_DUR }}
                     style={{
-                        scrollSnapAlign: 'start',
+                        scrollSnapAlign: 'center',
                         scrollSnapStop: 'normal',
                         width: '100%',
                         backgroundColor: TEXT_COLOR,
-                        height: '100vh',
+                        height: '100%',
                         minHeight: '100vh',
+                        paddingBottom: '2rem',
                     }}
                 >
                     <p
+                        id="Tagline"
                         style={{
                             color: BKG_COLOR,
                             textAlign: 'center',
@@ -379,9 +505,20 @@ const LandingPage = () => {
                             fontSize: '2rem',
                         }}
                     >
-                        Developer | Designer | Creator
+                        {isMediumViewport ? (
+                            'Developer | Designer | Creator'
+                        ) : (
+                            <span>
+                                Developer
+                                <br />
+                                Designer
+                                <br />
+                                Creator
+                            </span>
+                        )}
                     </p>
                     <div
+                        id="Intro section"
                         style={{
                             display: 'flex',
                             flexDirection: 'row',
@@ -390,6 +527,7 @@ const LandingPage = () => {
                         }}
                     >
                         <div
+                            id="Face SVG"
                             style={{
                                 display: isMediumViewport ? 'flex' : 'none',
                                 flexDirection: 'column',
@@ -411,6 +549,7 @@ const LandingPage = () => {
                             }}
                         >
                             <h2
+                                id="Hi"
                                 style={{
                                     fontSize: '10rem',
                                     color: BKG_COLOR,
@@ -422,6 +561,7 @@ const LandingPage = () => {
                                 Hi,
                             </h2>
                             <p
+                                id="Introduction 1"
                                 style={{
                                     color: BKG_COLOR,
                                     fontSize: '1.5rem',
@@ -433,6 +573,7 @@ const LandingPage = () => {
                                 I’m Matt — a full-stack developer who loves working across the entire spectrum of software: from user research and interface design, to writing scalable code, to spinning up servers that bring it all online.
                             </p>
                             <p
+                                id="Introduction 2"
                                 style={{
                                     color: BKG_COLOR,
                                     fontSize: '1.5rem',
@@ -482,7 +623,7 @@ const LandingPage = () => {
                             scrollSnapStop: 'normal',
                         }}
                     >
-                        <h1>That&apos;s all for now!</h1>
+                        <h1 id="Conclusion">That&apos;s all for now!</h1>
                         <div
                             style={{
                                 display: 'flex',
@@ -491,6 +632,7 @@ const LandingPage = () => {
                                 width: '100%',
                             }}
                             onClick={() => {
+                                track('Clicked Back to Top');
                                 pseudoBodyRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
                             }}
                         >
@@ -540,6 +682,7 @@ const Showcase = (props: ShowcaseProps) => {
             ref={targetRef}
         >
             <motion.div
+                id={`Showcase ${props.item.title} outside`}
                 initial={{ opacity: 0, transform: 'translateX(100px)' }}
                 whileInView={{ opacity: 1, transform: 'translateX(0)' }}
                 transition={{ duration: 1.5 }}
@@ -568,6 +711,7 @@ const Showcase = (props: ShowcaseProps) => {
                     }}
                 >
                     <h2
+                        id={`Showcase ${props.item.title} title`}
                         style={{
                             color: TEXT_COLOR,
                             fontSize: 'max(3vw, 3rem)',
@@ -592,6 +736,7 @@ const Showcase = (props: ShowcaseProps) => {
                                     href={props.item.link}
                                     target="_blank"
                                     rel="noopener noreferrer"
+                                    onClick={() => track(`Clicked Link for ${props.item.title}`)}
                                 >
                                     <MdOutlineLaunch
                                         style={{
@@ -604,6 +749,7 @@ const Showcase = (props: ShowcaseProps) => {
                         )}
                     </h2>
                     <p
+                        id={`Showcase ${props.item.title} description`}
                         style={{
                             color: TEXT_COLOR,
                             fontSize: 'max(1vw, 1rem)',
@@ -622,6 +768,7 @@ const Showcase = (props: ShowcaseProps) => {
                     >
                         {props.item.skills.map((skill, index) => (
                             <h1
+                                id={`Showcase ${props.item.title} skill ${index}`}
                                 key={index}
                                 style={{
                                     color: PRIMARY_COLOR,
@@ -638,6 +785,7 @@ const Showcase = (props: ShowcaseProps) => {
                     </div>
                 </motion.div>
                 <motion.img
+                    id={`Showcase ${props.item.title} thumbnail`}
                     initial={{ filter: 'drop-shadow(0 0 0 rgba(0, 0, 0, 0))' }}
                     whileHover={{ filter: `drop-shadow(-1px 1px 2px ${PRIMARY_COLOR})` }}
                     transition={{ duration: 0.2 }}
