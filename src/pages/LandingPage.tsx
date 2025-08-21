@@ -263,6 +263,7 @@ const LandingPage = () => {
                     display: 'flex',
                     flexDirection: 'row',
                     justifyContent: 'center',
+                    pointerEvents: 'none',
                 }}
             >
                 <motion.div
@@ -287,6 +288,7 @@ const LandingPage = () => {
                             alignItems: 'center',
                             justifyContent: 'center',
                             boxSizing: 'content-box',
+                            pointerEvents: 'auto',
                         }}
                         whileHover={{
                             transform: 'translateY(-2px)',
@@ -311,6 +313,7 @@ const LandingPage = () => {
                             alignItems: 'center',
                             justifyContent: 'center',
                             boxSizing: 'content-box',
+                            pointerEvents: 'auto',
                         }}
                         whileHover={{
                             transform: 'translateY(-2px)',
@@ -335,6 +338,7 @@ const LandingPage = () => {
                             alignItems: 'center',
                             justifyContent: 'center',
                             boxSizing: 'content-box',
+                            pointerEvents: 'auto',
                         }}
                         whileHover={{
                             transform: 'translateY(-2px)',
@@ -385,6 +389,7 @@ const LandingPage = () => {
                                     color: topTagColor,
                                     userSelect: 'none',
                                     lineHeight: '1',
+                                    fontSize: '1.75rem',
                                 }}
                             >
                                 {char === ' ' ? '\u00A0' : char}
@@ -496,17 +501,32 @@ const LandingPage = () => {
                         paddingBottom: '2rem',
                     }}
                 >
-                    <p
+                    <h2
                         id="Tagline"
                         style={{
                             color: BKG_COLOR,
                             textAlign: 'center',
                             padding: '4rem',
-                            fontSize: '2rem',
+                            fontSize: '1.75rem',
                         }}
                     >
                         {isMediumViewport ? (
-                            'Developer | Designer | Creator'
+                            <div>
+                                {['Developer', ' | ', 'Designer', ' | ', 'Creator'].map((role, index) => (
+                                    <motion.span
+                                        key={index}
+                                        initial={{ opacity: 0, x: -20 }}
+                                        whileInView={{ opacity: 1, x: 0 }}
+                                        transition={{ duration: 0.25, delay: (index + 2) * 0.25, animation: { type: 'spring', stiffness: 300 } }}
+                                        viewport={{ once: true }}
+                                        style={{
+                                            color: index % 2 === 0 ? BKG_COLOR : SECONDARY_COLOR,
+                                        }}
+                                    >
+                                        {role}
+                                    </motion.span>
+                                ))}
+                            </div>
                         ) : (
                             <span>
                                 Developer
@@ -516,7 +536,7 @@ const LandingPage = () => {
                                 Creator
                             </span>
                         )}
-                    </p>
+                    </h2>
                     <div
                         id="Intro section"
                         style={{
@@ -526,7 +546,7 @@ const LandingPage = () => {
                             width: isLargeViewport ? '100%' : '95%',
                         }}
                     >
-                        <div
+                        <motion.div
                             id="Face SVG"
                             style={{
                                 display: isMediumViewport ? 'flex' : 'none',
@@ -536,54 +556,135 @@ const LandingPage = () => {
                                 minWidth: '300px',
                                 maxHeight: '80vh',
                                 padding: '1rem',
+                                transform: 'translateY(-2rem)',
                             }}
+                            initial={{ opacity: 0 }}
+                            whileInView={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.5, delay: 0.5 }}
+                            viewport={{ once: true }}
                         >
                             <FaceSVG color={BKG_COLOR} />
-                        </div>
+                        </motion.div>
                         <div
                             style={{
                                 display: 'flex',
                                 flexDirection: 'column',
                                 alignItems: 'flex-start',
                                 justifyContent: 'flex-start',
+                                paddingBottom: isMediumViewport ? '8rem' : '2rem',
                             }}
                         >
-                            <h2
+                            <motion.h2
                                 id="Hi"
                                 style={{
-                                    fontSize: '10rem',
+                                    fontSize: '7rem',
                                     color: BKG_COLOR,
                                     textAlign: 'left',
-                                    maxWidth: '60ch',
                                     padding: '1rem',
                                 }}
+                                initial={{ opacity: 0, y: -10 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: 10 }}
+                                transition={{ duration: 0.25, delay: 1 * 0.05, animation: { type: 'spring', stiffness: 300 } }}
                             >
                                 Hi,
-                            </h2>
-                            <p
+                            </motion.h2>
+                            <motion.p
                                 id="Introduction 1"
                                 style={{
                                     color: BKG_COLOR,
-                                    fontSize: '1.5rem',
+                                    fontSize: '1.25rem',
                                     textAlign: 'left',
                                     maxWidth: '60ch',
                                     padding: '1rem',
+                                    paddingLeft: '2rem',
                                 }}
+                                initial={{ opacity: 0, y: -10 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: 10 }}
+                                transition={{ duration: 0.25, delay: 2 * 0.05, animation: { type: 'spring', stiffness: 300 } }}
                             >
                                 I’m Matt — a full-stack developer who loves working across the entire spectrum of software: from user research and interface design, to writing scalable code, to spinning up servers that bring it all online.
-                            </p>
-                            <p
+                            </motion.p>
+                            <motion.p
                                 id="Introduction 2"
                                 style={{
                                     color: BKG_COLOR,
-                                    fontSize: '1.5rem',
+                                    fontSize: '1.25rem',
                                     textAlign: 'left',
                                     maxWidth: '60ch',
                                     padding: '1rem',
+                                    paddingLeft: '2rem',
                                 }}
+                                initial={{ opacity: 0, y: -10 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: 10 }}
+                                transition={{ duration: 0.25, delay: 3 * 0.05, animation: { type: 'spring', stiffness: 300 } }}
                             >
                                 Over the years I’ve built tools for healthcare, education, and creative communities. I’m happiest when I’m learning something new while shipping real, useful products. I like to think of myself as equal parts builder, designer, and problem-solver.
-                            </p>
+                            </motion.p>
+                            <motion.h2
+                                id="Selected Projects"
+                                style={{
+                                    fontSize: '1.75rem',
+                                    color: BKG_COLOR,
+                                    textAlign: 'left',
+                                    padding: '1rem',
+                                }}
+                                initial={{ opacity: 0, y: -10 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: 10 }}
+                                transition={{ duration: 0.25, delay: 4 * 0.05, animation: { type: 'spring', stiffness: 300 } }}
+                            >
+                                Selected Projects
+                            </motion.h2>
+                            <motion.div
+                                style={{
+                                    display: 'flex',
+                                    flexDirection: 'row',
+                                    flexWrap: 'wrap',
+                                    gap: '0.5rem',
+                                    maxWidth: '60ch',
+                                    paddingLeft: '2rem',
+                                }}
+                                initial={{ opacity: 0, y: -10 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: 10 }}
+                                transition={{ duration: 0.25, delay: 5 * 0.05, animation: { type: 'spring', stiffness: 300 } }}
+                            >
+                                {items.map((item, index) => (
+                                    <motion.div
+                                        key={index}
+                                        style={{}}
+                                        initial={{ opacity: 0, y: -10 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: 10 }}
+                                        transition={{ duration: 0.25, delay: index * 0.05 + 0.5, animation: { type: 'spring', stiffness: 300 } }}
+                                    >
+                                        <motion.h1
+                                            initial={{ backgroundColor: 'transparent', color: BKG_COLOR, border: `1px solid ${BKG_COLOR}` }}
+                                            whileHover={{ backgroundColor: BKG_COLOR, color: TEXT_COLOR, border: `1px solid ${TEXT_COLOR}`, scale: 1.05 }}
+                                            exit={{ backgroundColor: 'transparent', color: BKG_COLOR, border: `1px solid ${BKG_COLOR}` }}
+                                            transition={{ duration: 0.2, ease: 'easeInOut' }}
+                                            whileTap={{ scale: 0.95 }}
+                                            style={{
+                                                borderRadius: '8px',
+                                                fontSize: '.75rem',
+                                                fontWeight: '600',
+                                                padding: '0.25rem 0.5rem',
+                                                cursor: 'pointer',
+                                            }}
+                                            onClick={() => {
+                                                track(`Clicked on project tag: ${item.title}`);
+                                                window.location.hash = `#${item.title}`;
+                                            }}
+                                        >
+                                            {item.title}
+                                        </motion.h1>
+                                    </motion.div>
+                                ))}
+                            </motion.div>
                         </div>
                     </div>
                 </motion.div>
@@ -595,7 +696,7 @@ const LandingPage = () => {
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
-                        gap: '10rem',
+                        gap: isMediumViewport ? '10rem' : '5rem',
                         paddingTop: '2rem',
                     }}
                 >
@@ -646,7 +747,10 @@ const LandingPage = () => {
                                     border: 'none',
                                 }}
                             >
-                                <MdOutlineArrowUpward size={32} />
+                                <MdOutlineArrowUpward
+                                    size={32}
+                                    color={TEXT_COLOR}
+                                />
                             </motion.button>
                         </div>
                     </motion.div>
@@ -671,8 +775,32 @@ const Showcase = (props: ShowcaseProps) => {
     const yMod = useSpring(y);
     const isLargeViewport = useMediaQuery('(min-width: 1200px)');
 
+    const descriptionSections = props.item.description
+        .split('\n')
+        .filter((section) => section.trim() !== '')
+        .map((section, index) => (
+            <motion.div
+                key={index}
+                initial={{ opacity: 0, y: -20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5, delay: (index + 1) * 0.25 }}
+            >
+                <p
+                    id={`Showcase ${props.item.title} description`}
+                    style={{
+                        color: TEXT_COLOR,
+                        fontSize: 'max(1vw, 1rem)',
+                    }}
+                >
+                    {section.trim()}
+                </p>
+            </motion.div>
+        ));
+
     return (
         <div
+            id={`${props.item.title}`}
             style={{
                 scrollSnapAlign: 'center',
                 scrollSnapStop: 'normal',
@@ -732,11 +860,15 @@ const Showcase = (props: ShowcaseProps) => {
                                 whileTap={{ scale: 0.95 }}
                                 transition={{ duration: 0.2, ease: 'easeInOut' }}
                             >
-                                <a
+                                <motion.a
                                     href={props.item.link}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     onClick={() => track(`Clicked Link for ${props.item.title}`)}
+                                    initial={{ opacity: 0 }}
+                                    whileInView={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    transition={{ duration: 0.5, delay: 0.75 }}
                                 >
                                     <MdOutlineLaunch
                                         style={{
@@ -744,19 +876,11 @@ const Showcase = (props: ShowcaseProps) => {
                                             fontSize: '1.5rem',
                                         }}
                                     />
-                                </a>
+                                </motion.a>
                             </motion.button>
                         )}
                     </h2>
-                    <p
-                        id={`Showcase ${props.item.title} description`}
-                        style={{
-                            color: TEXT_COLOR,
-                            fontSize: 'max(1vw, 1rem)',
-                        }}
-                    >
-                        <span dangerouslySetInnerHTML={{ __html: props.item.description.replace(/\n/g, '<br />') }} />
-                    </p>
+                    {descriptionSections}
                     <div
                         style={{
                             display: 'flex',
@@ -767,20 +891,29 @@ const Showcase = (props: ShowcaseProps) => {
                         }}
                     >
                         {props.item.skills.map((skill, index) => (
-                            <h1
+                            <motion.div
                                 id={`Showcase ${props.item.title} skill ${index}`}
                                 key={index}
-                                style={{
-                                    color: PRIMARY_COLOR,
-                                    fontSize: '.75rem',
-                                    fontWeight: '600',
-                                    border: `1px solid ${PRIMARY_COLOR}`,
-                                    borderRadius: '8px',
-                                    padding: '0.25rem 0.5rem',
-                                }}
+                                style={{}}
+                                initial={{ opacity: 0, y: -10 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: 10 }}
+                                transition={{ duration: 0.25, delay: index * 0.05 + (descriptionSections.length + 1) * 0.25, animation: { type: 'spring', stiffness: 300 } }}
                             >
-                                {skill}
-                            </h1>
+                                <motion.h1
+                                    style={{
+                                        backgroundColor: 'transparent',
+                                        color: PRIMARY_COLOR,
+                                        border: `1px solid ${PRIMARY_COLOR}`,
+                                        borderRadius: '8px',
+                                        fontSize: '.75rem',
+                                        fontWeight: '600',
+                                        padding: '0.25rem 0.5rem',
+                                    }}
+                                >
+                                    {skill}
+                                </motion.h1>
+                            </motion.div>
                         ))}
                     </div>
                 </motion.div>
