@@ -21,7 +21,7 @@ export const track = async (action: string) => {
             sessionId,
             action,
         };
-        await fetch('http://localhost:3000/', {
+        await fetch('https://tracker.matthagger.me', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
