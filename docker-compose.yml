@@ -22,3 +22,5 @@ services:
               target: ${DATABASE_PATH}
               bind:
                   create_host_path: true
+        env_file:
+            - .env
