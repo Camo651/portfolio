@@ -6,7 +6,8 @@
         "start": "webpack serve",
         "build": "webpack --mode production",
         "lint": "eslint .",
-        "types": "tsc --noemit"
+        "types": "tsc --noemit",
+        "build:prod": "npm ci && npm run build && rm -rf /www/* && cp -r ./public/* /www"
     },
     "dependencies": {
         "@mantine/hooks": "^8.2.5",
