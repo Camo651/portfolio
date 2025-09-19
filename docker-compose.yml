@@ -19,6 +19,6 @@ services:
         volumes:
             - type: bind
               source: ${DATABASE_PATH}
-              target: /etc/matthagger/
+              target: ${DATABASE_PATH}
               bind:
                   create_host_path: true
