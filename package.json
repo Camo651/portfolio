@@ -11,6 +11,7 @@
     },
     "dependencies": {
         "@mantine/hooks": "^8.2.5",
+        "@microsoft/clarity": "^1.0.0",
         "@types/react-router": "^5.1.20",
         "motion": "^12.23.12",
         "prettier": "^3.6.2",
